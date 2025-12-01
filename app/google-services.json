@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "629717779478",
+    "project_id": "mediflow-2025",
+    "storage_bucket": "mediflow-2025.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:629717779478:android:bd33a2747d6e9188486137",
+        "android_client_info": {
+          "package_name": "com.jotadev.mediflow"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "629717779478-alj8ia0542ioug44rp7fsi67s5lsu9bk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jotadev.mediflow",
+            "certificate_hash": "7842ac3ab78b61e1d21dda73a53cb0c32c3bc262"
+          }
+        },
+        {
+          "client_id": "629717779478-07ncbj94ffq2gh6dchjoie53ai67krku.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN9yZmfxlueGZFEiMcmv9fCXkN6KJSSdE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "629717779478-07ncbj94ffq2gh6dchjoie53ai67krku.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
