@@ -1,4 +1,42 @@
+## IDE
+.idea/
 *.iml
+.vscode/
+
+## Gradle/Build outputs
+.gradle/
+build/
+**/build/
+local.properties
+.kotlin/
+captures/
+.externalNativeBuild/
+.cxx/
+
+## OS-specific junk
+.DS_Store
+Thumbs.db
+
+## Secrets and credentials
+**/google-services.json
+**/GoogleService-Info.plist
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+*.keystore.properties
+*.pem
+*.crt
+*.key
+.env
+.env.*
+secrets.*
+
+## Config with potentially sensitive overrides
+gradle.properties
+
+## Git files
+.gitignore
 .gradle
 /local.properties
 /.idea/caches
