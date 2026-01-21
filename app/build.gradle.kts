@@ -21,7 +21,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         val baseUrlEmulator: String = (project.findProperty("BASE_URL_EMULATOR") as String?) ?: "http://10.0.2.2:8000/"
-        val baseUrlDevice: String = (project.findProperty("BASE_URL_DEVICE") as String?) ?: "http://192.168.1.95:8000/"
+        val baseUrlDevice: String = (project.findProperty("BASE_URL_DEVICE") as String?) ?: "http://192.168.1.43:8000/"
         val baseUrlFallback: String = (project.findProperty("BASE_URL") as String?) ?: baseUrlEmulator
 
         // BASE_URL queda como fallback; el cliente elegirá entre EMULATOR y DEVICE en runtime
@@ -91,4 +91,8 @@ dependencies {
 
     //icons
     implementation(libs.androidx.compose.material.icons.extended)
+    // Media3 (ExoPlayer)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.common)
 }

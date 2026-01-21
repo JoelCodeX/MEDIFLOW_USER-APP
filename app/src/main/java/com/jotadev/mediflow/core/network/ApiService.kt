@@ -92,6 +92,47 @@ data class IndicadoresDto(
     val motivacion_general_pct: Float
 )
 
+data class ContenidoDto(
+    val id: Int,
+    val titulo: String,
+    val descripcion: String?,
+    val tipo: String?,
+    val url_archivo: String?,
+    val fecha_publicacion: String?,
+    val publicado_por: Int?
+)
+
+data class ContenidosListResponse(
+    val items: List<ContenidoDto>,
+    val page: Int,
+    val page_size: Int,
+    val total: Int,
+    val pages: Int
+)
+
+data class ContenidoDetalleResponse(
+    val contenido: ContenidoDto,
+    val interacciones: Map<String, Int>?
+)
+
+data class RegistrarInteraccionContenidoRequest(
+    val id_usuario: Int,
+    val id_contenido: Int,
+    val tipo_interaccion: String
+)
+
+data class InteraccionContenidoDto(
+    val id: Int,
+    val id_usuario: Int,
+    val id_contenido: Int,
+    val tipo_interaccion: String?,
+    val fecha: String?
+)
+
+data class InteraccionesUsuarioResponse(
+    val items: List<InteraccionContenidoDto>
+)
+
 interface ApiService {
     @POST("/api/auth/firebase")
     suspend fun syncFirebase(@Body body: FirebaseTokenRequest): Response<Unit>
@@ -145,4 +186,31 @@ interface ApiService {
     suspend fun getIndicadores(
         @Path("id_usuario") idUsuario: Int
     ): Response<IndicadoresDto>
+
+    @GET("/api/contenidos/list")
+    suspend fun listarContenidos(
+        @Query("q") q: String? = null,
+        @Query("tipo") tipo: String? = null,
+        @Query("sort") sort: String? = "fecha_publicacion",
+        @Query("order") order: String? = "desc",
+        @Query("page") page: Int = 1,
+        @Query("page_size") pageSize: Int = 20
+    ): Response<ContenidosListResponse>
+
+    @GET("/api/contenidos/{id}")
+    suspend fun getContenido(
+        @Path("id") id: Int
+    ): Response<ContenidoDetalleResponse>
+
+    @POST("/api/contenidos/interaccion")
+    suspend fun registrarInteraccionContenido(
+        @Body body: RegistrarInteraccionContenidoRequest
+    ): Response<Map<String, Any>>
+
+    @GET("/api/contenidos/interaccion/usuario/{id_usuario}")
+    suspend fun getInteraccionesUsuarioContenido(
+        @Path("id_usuario") idUsuario: Int,
+        @Query("tipo_interaccion") tipoInteraccion: String? = null,
+        @Query("id_contenido") idContenido: Int? = null
+    ): Response<InteraccionesUsuarioResponse>
 }

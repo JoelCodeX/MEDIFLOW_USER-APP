@@ -33,6 +33,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material.icons.filled.ArrowBack
 import com.jotadev.mediflow.core.network.ApiClient
@@ -42,6 +44,7 @@ import com.jotadev.mediflow.screens.home.HomeScreen
 import com.jotadev.mediflow.screens.mensajes.MensajesScreen
 import com.jotadev.mediflow.screens.perfil.PerfilScreen
 import com.jotadev.mediflow.screens.recursos.RecursosScreen
+import com.jotadev.mediflow.screens.recursos.VisorRecursoScreen
 import com.jotadev.mediflow.ui.components.TopBarForNav
 import com.jotadev.mediflow.ui.components.TopBar
 import com.jotadev.mediflow.ui.components.ModalAsistencia
@@ -51,6 +54,9 @@ import com.jotadev.mediflow.ui.components.AsistenciaModo
 import com.jotadev.mediflow.screens.encuestas.EncuestasScreen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 data class BottomNavItem(
     val label: String,
@@ -88,7 +94,20 @@ fun HomeRoot(onLogoutClick: () -> Unit) {
         topBar = {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val route = navBackStackEntry?.destination?.route
-            if (route == "encuestas") {
+            if (route?.startsWith("visor") == true) {
+                val titulo = navBackStackEntry?.arguments?.getString("titulo") ?: "Recurso"
+                TopBar(
+                    title = titulo,
+                    navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Atrás"
+                            )
+                        }
+                    }
+                )
+            } else if (route == "encuestas") {
                 TopBar(
                     title = "Encuestas",
                     navigationIcon = {
@@ -151,7 +170,7 @@ fun HomeRoot(onLogoutClick: () -> Unit) {
         bottomBar = {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val route = navBackStackEntry?.destination?.route
-            if (route != "encuestas") {
+            if (route != "encuestas" && route?.startsWith("visor") != true) {
                 NavigationBar {
                     val currentDestination: NavDestination? = navBackStackEntry?.destination
                     tabs.forEach { item ->
@@ -197,11 +216,35 @@ fun HomeRoot(onLogoutClick: () -> Unit) {
                 onPendingEncuestaClick = { navController.navigate("encuestas") }
             )
         }
-            composable("recursos") { RecursosScreen() }
+            composable("recursos") { 
+                RecursosScreen(
+                    onResourceClick = { url, tipo, titulo ->
+                        val encodedUrl = URLEncoder.encode(url, StandardCharsets.UTF_8.toString())
+                        val encodedTipo = URLEncoder.encode(tipo, StandardCharsets.UTF_8.toString())
+                        val encodedTitulo = URLEncoder.encode(titulo, StandardCharsets.UTF_8.toString())
+                        navController.navigate("visor?url=$encodedUrl&tipo=$encodedTipo&titulo=$encodedTitulo")
+                    }
+                ) 
+            }
             composable("mensajes") { MensajesScreen() }
             composable("citas") { CitasScreen() }
             composable("perfil") { PerfilScreen() }
             composable("encuestas") { EncuestasScreen(onFinished = { navController.popBackStack() }, exitRequests = encuestaExitRequests) }
+            composable(
+                route = "visor?url={url}&tipo={tipo}&titulo={titulo}",
+                arguments = listOf(
+                    navArgument("url") { type = NavType.StringType; defaultValue = "" },
+                    navArgument("tipo") { type = NavType.StringType; defaultValue = "" },
+                    navArgument("titulo") { type = NavType.StringType; defaultValue = "" }
+                )
+            ) { backStackEntry ->
+                VisorRecursoScreen(
+                    url = backStackEntry.arguments?.getString("url") ?: "",
+                    tipo = backStackEntry.arguments?.getString("tipo") ?: "",
+                    titulo = backStackEntry.arguments?.getString("titulo") ?: "Recurso",
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 

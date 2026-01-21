@@ -42,25 +42,12 @@ fun CitasScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Text(
-            text = "Citas",
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSecondary,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            text = "Agenda y gestión de citas",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSecondary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 4.dp)
-        )
-        Spacer(Modifier.height(16.dp))
         OutlinedTextField(
             value = search.value,
             onValueChange = { search.value = it },
             label = { Text("Buscar cita") },
             modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(100),
             colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.3f)

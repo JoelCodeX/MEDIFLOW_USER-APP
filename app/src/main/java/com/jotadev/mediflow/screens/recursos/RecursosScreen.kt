@@ -1,6 +1,9 @@
 package com.jotadev.mediflow.screens.recursos
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,48 +28,29 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun RecursosScreen() {
-    val recursos = remember {
-        listOf(
-            ResourceItem(
-                type = ResourceType.PDF,
-                title = "Políticas internas",
-                desc = "Lineamientos actualizados para el personal",
-                progress = 0.85f,
-                completed = false
-            ),
-            ResourceItem(
-                type = ResourceType.DOC,
-                title = "Manual del colaborador",
-                desc = "Guía de procesos y buenas prácticas",
-                progress = 1f,
-                completed = true
-            ),
-            ResourceItem(
-                type = ResourceType.VIDEO,
-                title = "Capacitación inicial",
-                desc = "Video introductorio de estándares de atención",
-                progress = 0.4f,
-                completed = false
-            ),
-            ResourceItem(
-                type = ResourceType.AUDIO,
-                title = "Podcast de seguridad",
-                desc = "Buenas prácticas de bioseguridad",
-                progress = 0.6f,
-                completed = false
-            )
-        )
+fun RecursosScreen(
+    onResourceClick: (String, String, String) -> Unit
+) {
+    val viewModel: RecursosViewModel = viewModel(factory = RecursosViewModel.Factory)
+    val uiState by viewModel.uiState.collectAsState()
+    val recursos by viewModel.items.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadRecursos()
     }
 
     Column(
@@ -77,52 +61,85 @@ fun RecursosScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Text(
-            text = "Recursos",
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSecondary,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            text = "Materiales educativos: PDFs, videos y audios",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSecondary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 4.dp)
-        )
-        Spacer(Modifier.height(16.dp))
+        when (uiState) {
+            is RecursosUiState.Loading -> {
+                Spacer(Modifier.height(24.dp))
+                CircularProgressIndicator()
+            }
+            is RecursosUiState.Error -> {
+                val message = (uiState as RecursosUiState.Error).message
+                Spacer(Modifier.height(24.dp))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center
+                )
+            }
+            else -> Unit
+        }
+
+        Spacer(Modifier.height(8.dp))
+
         recursos.forEachIndexed { index, item ->
-            ResourceCard(item = item)
+            ResourceCard(
+                item = item,
+                onClick = {
+                    val url = item.url
+                    if (!url.isNullOrBlank()) {
+                        viewModel.registrarInteraccionVista(item.id)
+                        onResourceClick(url, item.tipo ?: "documento", item.title)
+                    }
+                }
+            )
             if (index != recursos.lastIndex) Spacer(Modifier.height(8.dp))
         }
     }
 }
 
 @Composable
-private fun ResourceCard(item: ResourceItem) {
+private fun ResourceCard(
+    item: RecursoUi,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = when (item.type) {
-                    ResourceType.PDF -> Icons.Rounded.PictureAsPdf
-                    ResourceType.DOC -> Icons.Rounded.Description
-                    ResourceType.VIDEO -> Icons.Rounded.PlayCircle
-                    ResourceType.AUDIO -> Icons.Rounded.Audiotrack
+                imageVector = when (item.tipo) {
+                    "pdf" -> Icons.Rounded.PictureAsPdf
+                    "video" -> Icons.Rounded.PlayCircle
+                    "documento" -> Icons.Rounded.Description
+                    "tip" -> Icons.Rounded.Policy
+                    "audio" -> Icons.Rounded.Audiotrack
+                    else -> Icons.Rounded.Description
                 },
                 contentDescription = null
             )
-            Column(modifier = Modifier.padding(start = 12.dp).weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .weight(1f)
+            ) {
                 Text(item.title, style = MaterialTheme.typography.titleMedium)
-                Text(item.desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondary)
+                if (!item.desc.isNullOrBlank()) {
+                    Text(
+                        item.desc,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSecondary
+                    )
+                }
             }
 
             Box(contentAlignment = Alignment.Center) {
-                ResourceDonut(progress = item.progress, color = MaterialTheme.colorScheme.primary)
+                val progress = if (item.completed) 1f else 0f
+                ResourceDonut(progress = progress, color = MaterialTheme.colorScheme.primary)
                 if (item.completed) {
                     Icon(
                         imageVector = Icons.Rounded.CheckCircle,
@@ -135,16 +152,6 @@ private fun ResourceCard(item: ResourceItem) {
         }
     }
 }
-
-private enum class ResourceType { PDF, DOC, VIDEO, AUDIO }
-
-private data class ResourceItem(
-    val type: ResourceType,
-    val title: String,
-    val desc: String,
-    val progress: Float, // 0f..1f visualización/apertura
-    val completed: Boolean
-)
 
 @Composable
 private fun ResourceDonut(progress: Float, color: Color) {
