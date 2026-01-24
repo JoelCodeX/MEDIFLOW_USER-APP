@@ -23,17 +23,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 
+import androidx.compose.material3.Switch
+import androidx.compose.ui.text.font.FontWeight
+import com.jotadev.mediflow.ui.theme.LocalIsDarkTheme
+import com.jotadev.mediflow.ui.theme.LocalThemeCallback
+
 @Composable
-fun PerfilScreen() {
+fun PerfilScreen(onLogoutClick: () -> Unit = {}) {
     val user = FirebaseAuth.getInstance().currentUser
     val nombre = user?.displayName ?: "Usuario"
     val correo = user?.email ?: "sin correo"
     val uid = user?.uid ?: ""
+    val isDarkTheme = LocalIsDarkTheme.current
+    val onThemeChanged = LocalThemeCallback.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.onPrimary)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
@@ -41,18 +48,18 @@ fun PerfilScreen() {
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(Modifier.padding(16.dp)) {
-                Text("Nombre", style = MaterialTheme.typography.labelMedium)
-                Text(nombre, style = MaterialTheme.typography.titleMedium)
+                Text("Nombre", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
+                Text(nombre, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.height(8.dp))
-                Text("Correo", style = MaterialTheme.typography.labelMedium)
-                Text(correo, style = MaterialTheme.typography.titleSmall)
+                Text("Correo", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
+                Text(correo, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.height(8.dp))
-                Text("UID Firebase", style = MaterialTheme.typography.labelMedium)
-                Text(uid.take(12) + if (uid.length > 12) "…" else "", style = MaterialTheme.typography.bodySmall)
+                Text("UID Firebase", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
+                Text(uid.take(12) + if (uid.length > 12) "…" else "", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.height(16.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     Button(
@@ -72,15 +79,46 @@ fun PerfilScreen() {
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(Modifier.padding(16.dp)) {
-                Text("Preferencias", style = MaterialTheme.typography.titleMedium)
+                Text("Preferencias", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.height(8.dp))
-                Text("• Notificaciones: activadas", style = MaterialTheme.typography.bodyMedium)
-                Text("• Tema: sistema", style = MaterialTheme.typography.bodyMedium)
+                
+                // Switch Tema
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Tema Oscuro", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                    Switch(
+                        checked = isDarkTheme,
+                        onCheckedChange = { onThemeChanged(it) }
+                    )
+                }
+                
+                Spacer(Modifier.height(8.dp))
+                Text("• Notificaciones: activadas", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
             }
+        }
+
+        Spacer(Modifier.height(24.dp))
+        
+        Button(
+            onClick = {
+                FirebaseAuth.getInstance().signOut()
+                onLogoutClick()
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+        ) {
+            Text(
+                text = "Cerrar sesión",
+                color = MaterialTheme.colorScheme.onError,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
         }
     }
 }

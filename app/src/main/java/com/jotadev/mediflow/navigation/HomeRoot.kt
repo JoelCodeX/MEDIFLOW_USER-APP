@@ -90,7 +90,7 @@ fun HomeRoot(onLogoutClick: () -> Unit) {
     )
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val route = navBackStackEntry?.destination?.route
@@ -212,7 +212,6 @@ fun HomeRoot(onLogoutClick: () -> Unit) {
         ) {
         composable("inicio") {
             HomeScreen(
-                onLogoutClick = onLogoutClick,
                 onPendingEncuestaClick = { navController.navigate("encuestas") }
             )
         }
@@ -228,7 +227,7 @@ fun HomeRoot(onLogoutClick: () -> Unit) {
             }
             composable("mensajes") { MensajesScreen() }
             composable("citas") { CitasScreen() }
-            composable("perfil") { PerfilScreen() }
+            composable("perfil") { PerfilScreen(onLogoutClick = onLogoutClick) }
             composable("encuestas") { EncuestasScreen(onFinished = { navController.popBackStack() }, exitRequests = encuestaExitRequests) }
             composable(
                 route = "visor?url={url}&tipo={tipo}&titulo={titulo}",

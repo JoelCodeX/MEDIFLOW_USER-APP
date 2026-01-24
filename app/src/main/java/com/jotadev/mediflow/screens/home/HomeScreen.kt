@@ -50,7 +50,7 @@ import com.jotadev.mediflow.utils.PendingSurveyManager
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun HomeScreen(onLogoutClick: () -> Unit, onPendingEncuestaClick: () -> Unit = {}) {
+fun HomeScreen(onPendingEncuestaClick: () -> Unit = {}) {
     val context = LocalContext.current
     val homeViewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
     val uiState = homeViewModel.uiState.collectAsState().value
@@ -115,25 +115,6 @@ fun HomeScreen(onLogoutClick: () -> Unit, onPendingEncuestaClick: () -> Unit = {
         item { CardCalendario {  } }
         item {
             Spacer(modifier = Modifier.height(8.dp))
-        }
-        item {
-            // Botón de "Marcar asistencia" removido; ya existe en la TopBar
-        }
-        item {
-            Button(
-                onClick = {
-                    FirebaseAuth.getInstance().signOut()
-                    onLogoutClick()
-                },
-                modifier = Modifier.padding(top = 24.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-            ) {
-                Text(
-                    text = "Cerrar sesión",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                )
-            }
         }
     }
         PullRefreshIndicator(

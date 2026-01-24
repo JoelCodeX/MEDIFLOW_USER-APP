@@ -19,3 +19,12 @@ val AzulNeonClaro = Color(0xFF02AFE7)
 val AzulTecnico = Color(0xFF0292C5)
 
 val Naranja = Color(0xE1FD980B)
+
+// DARK MODE COLORS
+val DarkPrimary = Color(0xFF0081D4) // Mismo azul o ligeramente más claro
+val DarkSecondary = Color(0xFF56AA45)
+val DarkBackground = Color(0xFF121212)
+val DarkSurface = Color(0xFF1E1E1E)
+val DarkOnPrimary = Color.White
+val DarkOnBackground = Color(0xFFE0E0E0)
+val DarkOnSurface = Color(0xFFE0E0E0)

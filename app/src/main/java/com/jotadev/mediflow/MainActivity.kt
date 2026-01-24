@@ -13,6 +13,12 @@ import androidx.core.view.WindowCompat
 import com.jotadev.mediflow.navigation.AppNavGraph
 import com.jotadev.mediflow.screens.home.HomeScreen
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.jotadev.mediflow.core.preferences.ThemePreferences
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,8 +28,18 @@ class MainActivity : ComponentActivity() {
         insetsController.isAppearanceLightStatusBars = false
         insetsController.isAppearanceLightNavigationBars = false
 
+        val themePrefs = ThemePreferences(this)
+
         setContent {
-            MediFlowTheme {
+            var isDarkTheme by remember { mutableStateOf(themePrefs.isDarkTheme) }
+
+            MediFlowTheme(
+                darkTheme = isDarkTheme,
+                onThemeChanged = { isDark ->
+                    isDarkTheme = isDark
+                    themePrefs.isDarkTheme = isDark
+                }
+            ) {
                 val start = if (intent?.getStringExtra("nav") == "home") "home" else "login"
                 AppNavGraph(startDestination = start)
 

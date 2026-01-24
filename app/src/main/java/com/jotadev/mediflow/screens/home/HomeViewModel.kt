@@ -19,6 +19,7 @@ import com.jotadev.mediflow.core.network.RegistrarSalidaRequest
 import com.jotadev.mediflow.core.network.AsistenciaActualDto
 import android.location.Location
 import android.os.Build
+import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import com.jotadev.mediflow.ui.components.AsistenciaEstado
 import com.jotadev.mediflow.ui.components.HorarioItem
 import com.jotadev.mediflow.di.AppModule
@@ -156,7 +157,7 @@ class HomeViewModel : ViewModel() {
         if (refrigerio != null) {
             items.add(HorarioItem(hora = "$refrigerio", titulo = "Refrigerio", subtitulo = "Hora de break", icono = androidx.compose.material.icons.Icons.Outlined.Group))
         }
-        items.add(HorarioItem(hora = salida, titulo = "Salida", subtitulo = "Cerrar jornada", icono = androidx.compose.material.icons.Icons.Outlined.ExitToApp))
+        items.add(HorarioItem(hora = salida, titulo = "Salida", subtitulo = "Cerrar jornada", icono = androidx.compose.material.icons.Icons.AutoMirrored.Outlined.ExitToApp))
         return items
     }
 
