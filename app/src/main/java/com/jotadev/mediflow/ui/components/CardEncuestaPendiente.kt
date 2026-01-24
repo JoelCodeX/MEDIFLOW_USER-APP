@@ -39,7 +39,7 @@ fun CardEncuestaPendiente(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(80.dp),
+            .height(70.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -55,7 +55,7 @@ fun CardEncuestaPendiente(
                             Color(0xFFFF7043)  // coral
                         )
                     ),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(8.dp)
                 )
                 .padding(16.dp)
         ) {
@@ -67,14 +67,13 @@ fun CardEncuestaPendiente(
                 Icon(
                     imageVector = Icons.Outlined.Error,
                     contentDescription = "Encuesta Pendiente",
-                    tint = Color.White,
+                    tint = Color.Red,
                     modifier = Modifier.size(32.dp)
                 )
                 Text(
                     text = titulo,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 16.sp
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold
                     ),
                     color = Color.White,
                     modifier = Modifier.weight(1f)
@@ -88,11 +87,18 @@ fun CardEncuestaPendiente(
 
                 Button(
                     onClick = onResponder,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color(0xFFFF7043)),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.White,
+                        contentColor = Color(0xFFFF7043)
+                    ),
                     modifier = Modifier.size(width = 120.dp, height = 40.dp),
-                    shape = RoundedCornerShape(100)
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text(text = "Responder", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        text = "Responder", style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
                 }
             }
         }

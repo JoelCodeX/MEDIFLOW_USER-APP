@@ -1,12 +1,12 @@
 package com.jotadev.mediflow.ui.components
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -34,17 +34,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.jotadev.mediflow.ui.theme.Amarillo
+import com.jotadev.mediflow.ui.theme.CRITICAL
+import com.jotadev.mediflow.ui.theme.Morado
+import com.jotadev.mediflow.ui.theme.Naranja
+import com.jotadev.mediflow.ui.theme.OK
+import com.jotadev.mediflow.ui.theme.Primary
+import com.jotadev.mediflow.ui.theme.Verde
+import com.jotadev.mediflow.ui.theme.WARNING
 
 data class IndicadorData(
     val titulo: String,
@@ -52,7 +62,8 @@ data class IndicadorData(
     val valorActual: Float,
     val valorMaximo: Float,
     val unidad: String,
-    val icon: ImageVector? = null,
+    val icon: ImageVector?,
+    val iconColor: Color,
     val umbrales: IndicadorUmbrales = IndicadorUmbrales(),
 )
 
@@ -107,19 +118,20 @@ fun IndicadorCard(
     data: IndicadorData,
     modifier: Modifier = Modifier,
 ) {
-    val ratio = if (data.valorMaximo > 0f) (data.valorActual / data.valorMaximo).coerceIn(0f, 1f) else 0f
+    val ratio =
+        if (data.valorMaximo > 0f) (data.valorActual / data.valorMaximo).coerceIn(0f, 1f) else 0f
     val nivel = nivelPorRatio(ratio, data.umbrales)
     val colorNivel = when (nivel) {
-        IndicadorNivel.OK -> MaterialTheme.colorScheme.secondary
-        IndicadorNivel.WARNING -> Color(0xFFFFA726)
-        IndicadorNivel.CRITICAL -> MaterialTheme.colorScheme.error
+        IndicadorNivel.OK -> OK
+        IndicadorNivel.WARNING -> WARNING
+        IndicadorNivel.CRITICAL -> CRITICAL
     }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         BoxWithConstraints(modifier = Modifier.padding(12.dp)) {
@@ -147,6 +159,7 @@ fun IndicadorCard(
                     Text(
                         text = data.titulo,
                         style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
@@ -157,14 +170,14 @@ fun IndicadorCard(
                             modifier = Modifier
                                 .size(32.dp)
                                 .clip(CircleShape)
-                                .background(colorNivel.copy(alpha = 0.15f)),
+                                .background(data.iconColor.copy(alpha = 0.15f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = data.icon, 
-                                contentDescription = null, 
-                                tint = colorNivel,
-                                modifier = Modifier.size(24.dp)
+                                imageVector = data.icon,
+                                contentDescription = null,
+                                modifier = Modifier.size(28.dp),
+                                tint = data.iconColor
                             )
                         }
                     }
@@ -217,9 +230,16 @@ private fun LeyendaNivel(nivel: IndicadorNivel) {
         IndicadorNivel.WARNING -> "Advertencia" to Color(0xFFFFA726)
         IndicadorNivel.CRITICAL -> "Crítico" to MaterialTheme.colorScheme.error
     }
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Box(modifier = Modifier.size(10.dp).clip(CircleShape).background(color))
-        Text(texto, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            texto,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -271,7 +291,10 @@ private fun IndicadorCardSkeleton(modifier: Modifier = Modifier) {
             ShimmerBox(modifier = Modifier.height(12.dp).fillMaxWidth(0.8f))
             Spacer(modifier = Modifier.weight(1f))
             // Leyenda
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 ShimmerBox(modifier = Modifier.size(10.dp).clip(CircleShape))
                 ShimmerBox(modifier = Modifier.height(12.dp).fillMaxWidth(0.3f))
             }
@@ -320,20 +343,22 @@ fun IndicadoresPanel(
     }
     val items = listOf(
         IndicadorData(
-            titulo = "Nivel de bienestar",
+            titulo = "Bienestar",
             descripcion = "Promedio diario (estrés, ánimo, sueño)",
             valorActual = bienestarPromedio,
             valorMaximo = 100f,
             unidad = "%",
-            icon = Icons.Outlined.SelfImprovement
+            icon = Icons.Outlined.SelfImprovement,
+            iconColor = Primary
         ),
         IndicadorData(
-            titulo = "Salud emocional",
+            titulo = "Emocional",
             descripcion = "Promedio de las últimas 7 evaluaciones de ánimo",
             valorActual = saludEmocionalProm7,
             valorMaximo = 100f,
             unidad = "%",
-            icon = Icons.Outlined.Favorite
+            icon = Icons.Outlined.Favorite,
+            iconColor = Morado
         ),
         IndicadorData(
             titulo = "Asistencia",
@@ -341,15 +366,18 @@ fun IndicadoresPanel(
             valorActual = asistenciaSemanalPct,
             valorMaximo = 100f,
             unidad = "%",
-            icon = Icons.Outlined.Schedule
+            icon = Icons.Outlined.Schedule,
+            iconColor = Verde
         ),
         IndicadorData(
-            titulo = "Motivación general",
+            titulo = "Motivación",
             descripcion = "Promedio ponderado (motivación + asistencia + estrés)",
             valorActual = motivacionGeneral,
             valorMaximo = 100f,
             unidad = "%",
-            icon = Icons.Outlined.Spa
+            icon = Icons.Outlined.Spa,
+            iconColor = Amarillo
+
         )
     )
     val filas = remember(items) { items.chunked(2) }
