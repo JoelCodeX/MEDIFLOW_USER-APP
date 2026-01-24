@@ -44,7 +44,6 @@ data class HorarioItem(
 
 @Composable
 fun CardHorario(
-    tituloCard: String = "Tu horario de hoy",
     items: List<HorarioItem> = emptyList(),
     modifier: Modifier = Modifier,
 ) {
@@ -52,25 +51,11 @@ fun CardHorario(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.onPrimary,
+            containerColor = MaterialTheme.colorScheme.surface,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = tituloCard,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            HorizontalDivider(
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)),
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
             if (items.isEmpty()) {
                 Text(
                     text = "Horario aún no asignado",

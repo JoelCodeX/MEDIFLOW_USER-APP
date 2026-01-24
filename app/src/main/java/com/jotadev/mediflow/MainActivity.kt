@@ -23,10 +23,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // Fuerza iconos claros (blancos) en barra de estado y navegación
-        val insetsController = WindowCompat.getInsetsController(window, window.decorView)
-        insetsController.isAppearanceLightStatusBars = false
-        insetsController.isAppearanceLightNavigationBars = false
 
         val themePrefs = ThemePreferences(this)
 
@@ -42,14 +38,14 @@ class MainActivity : ComponentActivity() {
             ) {
                 val start = if (intent?.getStringExtra("nav") == "home") "home" else "login"
                 AppNavGraph(startDestination = start)
-
             }
         }
 
         // Solicitar permiso de notificaciones en Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val permission = Manifest.permission.POST_NOTIFICATIONS
-            val isGranted = ContextCompat.checkSelfPermission(this, permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            val isGranted = ContextCompat.checkSelfPermission(this, permission) ==
+                    android.content.pm.PackageManager.PERMISSION_GRANTED
             if (!isGranted) {
                 ActivityCompat.requestPermissions(this, arrayOf(permission), 1001)
             }

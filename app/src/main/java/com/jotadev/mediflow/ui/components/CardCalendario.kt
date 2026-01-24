@@ -10,14 +10,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -40,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
@@ -70,14 +67,14 @@ fun CardCalendario(
     val diasDelMes = remember(mesActual) {
         val primerDia = mesActual.atDay(1)
         val ultimoDia = mesActual.atEndOfMonth()
-        
+
         (1..ultimoDia.dayOfMonth).map { dia ->
             val fecha = mesActual.atDay(dia)
             DiaCalendario(
                 fecha = fecha,
                 dia = dia,
                 diaSemana = fecha.dayOfWeek.getDisplayName(
-                    java.time.format.TextStyle.SHORT, 
+                    java.time.format.TextStyle.SHORT,
                     Locale("es", "ES")
                 ).uppercase(),
                 esHoy = fecha == hoy,
@@ -99,7 +96,7 @@ fun CardCalendario(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -115,12 +112,12 @@ fun CardCalendario(
                     text = mesActual.format(
                         DateTimeFormatter.ofPattern("MMMM yyyy", Locale("es", "ES"))
                     ).replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold
                     ),
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                
+
                 Row {
                     IconButton(
                         onClick = { mesActual = mesActual.minusMonths(1) },
@@ -129,7 +126,7 @@ fun CardCalendario(
                         Icon(
                             imageVector = Icons.Default.ChevronLeft,
                             contentDescription = "Mes anterior",
-                            tint = MaterialTheme.colorScheme.onSurface,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -141,13 +138,12 @@ fun CardCalendario(
                         Icon(
                             imageVector = Icons.Default.ChevronRight,
                             contentDescription = "Mes siguiente",
-                            tint = MaterialTheme.colorScheme.onSurface,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(20.dp)
                         )
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
             LazyRow(
                 state = listState,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -186,11 +182,11 @@ private fun DiaItem(
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(8.dp))
             .background(color = indicatorColor)
             .clickable { onClick() }
             .padding(horizontal = 12.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -204,7 +200,7 @@ private fun DiaItem(
             Text(
                 text = nombreDia,
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Medium
                 ),
                 color = onIndicatorColor,
@@ -215,7 +211,7 @@ private fun DiaItem(
                 text = dia.dia.toString().padStart(2, '0'),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = if (dia.esHoy) FontWeight.Bold else FontWeight.Medium,
-                    fontSize = 14.sp
+                    fontSize = 16.sp
                 ),
                 color = onIndicatorColor,
                 textAlign = TextAlign.Center
