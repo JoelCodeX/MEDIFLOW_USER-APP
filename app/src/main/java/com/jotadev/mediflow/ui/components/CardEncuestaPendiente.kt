@@ -1,6 +1,7 @@
 package com.jotadev.mediflow.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -39,7 +40,12 @@ fun CardEncuestaPendiente(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(70.dp),
+            .height(70.dp)
+            .border(
+                width = 0.5.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = RoundedCornerShape(16.dp)
+            ),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
