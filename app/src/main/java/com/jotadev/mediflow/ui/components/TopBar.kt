@@ -1,6 +1,8 @@
 package com.jotadev.mediflow.ui.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material.Divider
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -12,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
@@ -36,21 +39,28 @@ fun TopBar(
     val currentActions by rememberUpdatedState(newValue = actions)
     val currentNavigationIcon by rememberUpdatedState(newValue = navigationIcon)
 
-    TopAppBar(
-        title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        },
-        navigationIcon = { currentNavigationIcon?.invoke() },
-        actions = currentActions,
-        colors = colors,
-        modifier = modifier,
-    )
+    Column {
+        TopAppBar(
+            title = {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+            navigationIcon = { currentNavigationIcon?.invoke() },
+            actions = currentActions,
+            colors = colors,
+            modifier = modifier,
+        )
+        Divider(
+            thickness = 0.5.dp,
+            color = MaterialTheme.colorScheme.outline
+        )
+    }
 }
+
 @Composable
 fun TopBarForNav(
     navController: NavController,

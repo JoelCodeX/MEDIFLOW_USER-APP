@@ -97,7 +97,7 @@ fun CardCalendario(
         modifier = modifier.fillMaxWidth().border(
             width = 0.5.dp,
             color = MaterialTheme.colorScheme.outline,
-            shape = RoundedCornerShape(12.dp)
+            shape = RoundedCornerShape(16.dp)
         ),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
