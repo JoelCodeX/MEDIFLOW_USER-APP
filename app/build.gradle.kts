@@ -19,9 +19,12 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val baseUrlEmulator: String = (project.findProperty("BASE_URL_EMULATOR") as String?) ?: "http://10.0.2.2:8000/"
-        val baseUrlDevice: String = (project.findProperty("BASE_URL_DEVICE") as String?) ?: "http://192.168.1.43:8000/"
-        val baseUrlFallback: String = (project.findProperty("BASE_URL") as String?) ?: baseUrlEmulator
+        val baseUrlEmulator: String =
+            (project.findProperty("BASE_URL_EMULATOR") as String?) ?: "http://10.0.2.2:8000/"
+        val baseUrlDevice: String =
+            (project.findProperty("BASE_URL_DEVICE") as String?) ?: "http://192.168.1.43:8000/"
+        val baseUrlFallback: String =
+            (project.findProperty("BASE_URL") as String?) ?: baseUrlEmulator
 
         // BASE_URL queda como fallback; el cliente elegirá entre EMULATOR y DEVICE en runtime
         buildConfigField("String", "BASE_URL", "\"${baseUrlFallback}\"")
@@ -39,12 +42,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlin {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
     buildFeatures {
@@ -81,6 +85,7 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.datastore.core)
+    implementation(libs.androidx.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -88,6 +93,10 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+
 
     //icons
     implementation(libs.androidx.compose.material.icons.extended)

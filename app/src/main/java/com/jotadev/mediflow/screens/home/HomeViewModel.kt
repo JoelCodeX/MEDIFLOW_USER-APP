@@ -4,11 +4,8 @@ import android.location.Location
 import android.os.Build
 import android.util.Log
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
-import androidx.compose.material.icons.outlined.ExitToApp
-import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Restaurant
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -28,12 +25,12 @@ import com.jotadev.mediflow.ui.components.HorarioItem
 import com.jotadev.mediflow.ui.theme.CRITICAL
 import com.jotadev.mediflow.ui.theme.Naranja
 import com.jotadev.mediflow.ui.theme.Primary
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 sealed interface HomeUiState {
     data object Idle : HomeUiState
@@ -273,7 +270,11 @@ class HomeViewModel : ViewModel() {
                             java.time.ZonedDateTime.of(nowDate, lt, java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
                         } catch (e: Exception) { null }
                     }
-                    _state.value = _state.value.copy(asistenciaEstado = AsistenciaEstado(entradaMillis, salidaMillis))
+                    _state.value = _state.value.copy(asistenciaEstado = AsistenciaEstado(
+                        entradaMillis,
+                        salidaMillis
+                    )
+                    )
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error refrescando estado de asistencia", e)

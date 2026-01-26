@@ -155,7 +155,7 @@ fun SearchBar(
         placeholder = {
             Text(
                 "Buscar recursos de salud...",
-                color = MaterialTheme.colorScheme.onSurface,
+                color = Color.Gray,
                 style = MaterialTheme.typography.bodyMedium
             )
         },
@@ -197,25 +197,35 @@ fun CategoryFilters(
     selectedCategory: String,
     onCategorySelected: (String) -> Unit
 ) {
-    val categories = listOf("Todos", "Video", "Audio", "Documentos")
+    val iconcategories= listOf(Icons.Rounded.GridView,Icons.Rounded.PlayCircle,Icons.Rounded.Headphones,
+        Icons.AutoMirrored.Rounded.Article,Icons.Rounded.Image,Icons.Rounded.PictureAsPdf)
+    val categories = listOf("Todos", "Video", "Audio", "Docx","Imagen", "Pdf")
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(categories) { category ->
+        items(categories.zip(iconcategories)) { (category, icon) ->
             val isSelected = selectedCategory == category
             FilterChip(
                 selected = isSelected,
                 onClick = { onCategorySelected(category) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = if (isSelected) Color.White else Color.Gray
+                    )
+                },
                 label = {
                     Text(
                         text = category,
-                        color = if (isSelected) Color.White else Color.Black,
-                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                        color = if (isSelected) Color.White else MaterialTheme.colorScheme.onBackground,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                     )
                 },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = MaterialTheme.colorScheme.primary,
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
                 border = FilterChipDefaults.filterChipBorder(
                     enabled = true,
