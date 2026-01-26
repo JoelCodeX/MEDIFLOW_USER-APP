@@ -1,9 +1,14 @@
 package com.jotadev.mediflow.screens.home
 
+import android.location.Location
+import android.os.Build
 import android.util.Log
+import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.outlined.ExitToApp
 import androidx.compose.material.icons.outlined.Group
 import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -12,23 +17,23 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.jotadev.mediflow.core.events.AppEvents
 import com.jotadev.mediflow.core.network.ApiClient
 import com.jotadev.mediflow.core.network.ApiService
+import com.jotadev.mediflow.core.network.AsistenciaActualDto
 import com.jotadev.mediflow.core.network.HorarioDto
-import com.jotadev.mediflow.core.network.UsuarioDto
 import com.jotadev.mediflow.core.network.MarcarEntradaRequest
 import com.jotadev.mediflow.core.network.RegistrarSalidaRequest
-import com.jotadev.mediflow.core.network.AsistenciaActualDto
-import android.location.Location
-import android.os.Build
-import androidx.compose.material.icons.automirrored.outlined.ExitToApp
+import com.jotadev.mediflow.core.network.UsuarioDto
+import com.jotadev.mediflow.di.AppModule
 import com.jotadev.mediflow.ui.components.AsistenciaEstado
 import com.jotadev.mediflow.ui.components.HorarioItem
-import com.jotadev.mediflow.di.AppModule
-import kotlinx.coroutines.tasks.await
+import com.jotadev.mediflow.ui.theme.CRITICAL
+import com.jotadev.mediflow.ui.theme.Naranja
+import com.jotadev.mediflow.ui.theme.Primary
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.tasks.await
 
 sealed interface HomeUiState {
     data object Idle : HomeUiState
@@ -149,15 +154,44 @@ class HomeViewModel : ViewModel() {
         val h = horarios.firstOrNull() ?: return emptyList()
         val fmtIn = DateTimeFormatter.ofPattern("HH:mm")
         val fmtOut = DateTimeFormatter.ofPattern("h:mm a")
-        val entrada = LocalTime.parse(h.hora_entrada, fmtIn).format(fmtOut)
-        val salida = LocalTime.parse(h.hora_salida, fmtIn).format(fmtOut)
-        val refrigerio = h.hora_refrigerio?.let { LocalTime.parse(it, fmtIn).format(fmtOut) }
+        
+        val ltEntrada = LocalTime.parse(h.hora_entrada, fmtIn)
+        val ltSalida = LocalTime.parse(h.hora_salida, fmtIn)
+        val ltRefrigerio = h.hora_refrigerio?.let { LocalTime.parse(it, fmtIn) }
+        
+        val entrada = ltEntrada.format(fmtOut)
+        val salida = ltSalida.format(fmtOut)
+        
         val items = mutableListOf<HorarioItem>()
-        items.add(HorarioItem(hora = entrada, titulo = "Entrada", subtitulo = "Comenzar jornada", icono = androidx.compose.material.icons.Icons.Outlined.PlayCircle))
-        if (refrigerio != null) {
-            items.add(HorarioItem(hora = "$refrigerio", titulo = "Refrigerio", subtitulo = "Hora de break", icono = androidx.compose.material.icons.Icons.Outlined.Group))
+        items.add(HorarioItem(
+            hora = entrada, 
+            titulo = "Entrada", 
+            subtitulo = "Comenzar jornada", 
+            icono = androidx.compose.material.icons.Icons.Outlined.PlayCircle,
+            color = Primary,
+            horaReal = ltEntrada
+        ))
+        
+        if (ltRefrigerio != null) {
+            val refrigerio = ltRefrigerio.format(fmtOut)
+            items.add(HorarioItem(
+                hora = refrigerio, 
+                titulo = "Refrigerio", 
+                subtitulo = "Hora de break", 
+                icono = androidx.compose.material.icons.Icons.Outlined.Restaurant,
+                color = Naranja,
+                horaReal = ltRefrigerio
+            ))
         }
-        items.add(HorarioItem(hora = salida, titulo = "Salida", subtitulo = "Cerrar jornada", icono = androidx.compose.material.icons.Icons.AutoMirrored.Outlined.ExitToApp))
+        
+        items.add(HorarioItem(
+            hora = salida, 
+            titulo = "Salida", 
+            subtitulo = "Cerrar jornada", 
+            icono = androidx.compose.material.icons.Icons.AutoMirrored.Outlined.ExitToApp,
+            color = CRITICAL,
+            horaReal = ltSalida
+        ))
         return items
     }
 

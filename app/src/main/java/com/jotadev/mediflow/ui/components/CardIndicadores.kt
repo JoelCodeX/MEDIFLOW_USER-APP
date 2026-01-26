@@ -253,8 +253,8 @@ private fun LeyendaNivel(nivel: IndicadorNivel) {
 @Composable
 private fun ShimmerBox(
     modifier: Modifier = Modifier,
-    baseColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-    highlightColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+    baseColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.1f),
+    highlightColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f)
 ) {
     val transition = rememberInfiniteTransition(label = "shimmer")
     val shift = transition.animateFloat(
@@ -279,7 +279,7 @@ private fun IndicadorCardSkeleton(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(

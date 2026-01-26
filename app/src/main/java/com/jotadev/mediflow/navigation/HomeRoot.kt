@@ -175,7 +175,7 @@ fun HomeRoot(onLogoutClick: () -> Unit) {
                                 },
                                 label = { Text(item.label) },
                                 colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = MaterialTheme.colorScheme.secondary,
+                                    selectedIconColor = MaterialTheme.colorScheme.primary,
                                     unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.7f),
                                     selectedTextColor = MaterialTheme.colorScheme.primary,
                                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.7f),

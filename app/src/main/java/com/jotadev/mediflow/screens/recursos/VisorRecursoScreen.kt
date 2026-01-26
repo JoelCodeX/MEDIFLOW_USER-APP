@@ -61,7 +61,7 @@ fun VisorRecursoScreen(
     }
 }
 
-@androidx.annotation.OptIn(UnstableApi::class)
+@OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayer(url: String) {
     val context = LocalContext.current

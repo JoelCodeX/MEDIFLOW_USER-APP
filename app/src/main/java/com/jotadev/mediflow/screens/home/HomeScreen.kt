@@ -214,6 +214,7 @@ fun HomeScreen(
             PullRefreshIndicator(
                 refreshing = refreshing,
                 state = pullRefreshState,
+                contentColor = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 8.dp)
