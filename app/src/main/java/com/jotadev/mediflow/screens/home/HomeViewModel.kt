@@ -156,8 +156,8 @@ class HomeViewModel : ViewModel() {
         val ltSalida = LocalTime.parse(h.hora_salida, fmtIn)
         val ltRefrigerio = h.hora_refrigerio?.let { LocalTime.parse(it, fmtIn) }
         
-        val entrada = ltEntrada.format(fmtOut)
-        val salida = ltSalida.format(fmtOut)
+        val entrada = ltEntrada.format(fmtOut).uppercase()
+        val salida = ltSalida.format(fmtOut).uppercase()
         
         val items = mutableListOf<HorarioItem>()
         items.add(HorarioItem(
@@ -170,7 +170,7 @@ class HomeViewModel : ViewModel() {
         ))
         
         if (ltRefrigerio != null) {
-            val refrigerio = ltRefrigerio.format(fmtOut)
+            val refrigerio = ltRefrigerio.format(fmtOut).uppercase()
             items.add(HorarioItem(
                 hora = refrigerio, 
                 titulo = "Refrigerio", 

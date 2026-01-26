@@ -30,7 +30,8 @@ data class RecursoUi(
     val desc: String?,
     val tipo: String?,
     val url: String?,
-    val completed: Boolean
+    val completed: Boolean,
+    val progress: Float = 0f
 )
 
 class RecursosViewModel : ViewModel() {

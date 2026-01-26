@@ -38,12 +38,25 @@ fun RecursosScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Todos") }
 
+    // Mapper temporal para simular progreso si no viene del backend
+    val recursosConProgreso = remember(recursos) {
+        recursos.mapIndexed { index, item ->
+            val simulatedProgress = when (index) {
+                0 -> 0.4f
+                1 -> 1.0f
+                2 -> 0.0f
+                else -> if (item.completed) 1.0f else 0.0f
+            }
+            item.copy(progress = simulatedProgress)
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.loadRecursos()
     }
 
-    val filteredRecursos = remember(recursos, searchQuery, selectedCategory) {
-        recursos.filter { item ->
+    val filteredRecursos = remember(recursosConProgreso, searchQuery, selectedCategory) {
+        recursosConProgreso.filter { item ->
             val matchesSearch = item.title.contains(searchQuery, ignoreCase = true) ||
                     (item.desc?.contains(searchQuery, ignoreCase = true) == true)
             val matchesCategory = selectedCategory == "Todos" ||
@@ -63,12 +76,12 @@ fun RecursosScreen(
     ) {
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Search Bar
+        // Search Bar Mejorada
         SearchBar(
             query = searchQuery,
             onQueryChange = { searchQuery = it }
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp)) // Más espacio tras búsqueda
 
         // Categories
         CategoryFilters(
@@ -76,7 +89,7 @@ fun RecursosScreen(
             onCategorySelected = { selectedCategory = it }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Header "Recientes"
         Row(
@@ -147,39 +160,32 @@ fun SearchBar(
     query: String,
     onQueryChange: (String) -> Unit
 ) {
-    var isFocused by remember { mutableStateOf(false) }
-
     TextField(
         value = query,
         onValueChange = onQueryChange,
         placeholder = {
             Text(
-                "Buscar recursos de salud...",
-                color = Color.Gray,
+                "Buscar recursos...",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodyMedium
             )
         },
         leadingIcon = {
             Icon(
                 Icons.Default.Search,
-                contentDescription = null,
-                tint = Color.Gray
+                contentDescription = "Buscar",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .onFocusChanged { focusState ->
-                isFocused = focusState.isFocused
-            }
+            .height(52.dp) // Altura fija más compacta
             .border(
                 width = 1.dp,
-                color = if (isFocused)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(12.dp)
-            ),
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = RoundedCornerShape(12.dp) // Bordes redondeados pero no full circle para mantener estilo
+            )
+            .clip(RoundedCornerShape(12.dp)),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surface,
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -188,7 +194,8 @@ fun SearchBar(
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent
         ),
-        singleLine = true
+        singleLine = true,
+        textStyle = MaterialTheme.typography.bodyMedium
     )
 }
 
@@ -230,7 +237,7 @@ fun CategoryFilters(
                 border = FilterChipDefaults.filterChipBorder(
                     enabled = true,
                     selected = isSelected,
-                    borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+                    borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                 ),
                 shape = RoundedCornerShape(16.dp)
             )
@@ -319,58 +326,116 @@ fun NewResourceCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                if (item.completed) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Rounded.CheckCircle,
-                            contentDescription = null,
-                            tint = Color(0xFF10B981), // Green
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Completado",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = Color(0xFF10B981),
-                                fontWeight = FontWeight.Bold
+                val progress = item.progress
+                
+                when {
+                    progress >= 1f -> {
+                        // Completado
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Rounded.CheckCircle,
+                                    contentDescription = null,
+                                    tint = Color(0xFF10B981), // Green
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Completado",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        color = Color(0xFF10B981),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                )
+                            }
+                            Text(
+                                text = "100%",
+                                style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
                             )
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "100%",
-                            style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        LinearProgressIndicator(
+                            progress = { 1f },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(2.dp)),
+                            color = Color(0xFF10B981),
+                            trackColor = Color(0xFFE5E7EB),
                         )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    LinearProgressIndicator(
-                        progress = { 1f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(4.dp)
-                            .clip(RoundedCornerShape(2.dp)),
-                        color = Color(0xFF10B981),
-                        trackColor = Color(0xFFE5E7EB),
-                    )
-                } else {
-                    // Not completed - Show "Comenzar" button or "Sin comenzar" status
-                    // Mimicking the image's "Comenzar" button
-                    Button(
-                        onClick = onClick,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                            contentColor = MaterialTheme.colorScheme.primary
-                        ),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                        modifier = Modifier
-                            .height(32.dp)
-                            .align(Alignment.End), // Align to right like in some cards
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = ButtonDefaults.buttonElevation(0.dp)
-                    ) {
-                        Text(
-                            text = "Comenzar",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                    progress > 0f -> {
+                        // En curso
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "En curso",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                            Text(
+                                text = "${(progress * 100).toInt()}%",
+                                style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        LinearProgressIndicator(
+                            progress = { progress },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(2.dp)),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = Color(0xFFE5E7EB),
                         )
+                    }
+                    else -> {
+                        // Sin comenzar
+                        val isMedia = item.tipo?.lowercase() in listOf("video", "mp4", "audio", "mp3")
+                        if (isMedia) {
+                            Button(
+                                onClick = onClick,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                    contentColor = MaterialTheme.colorScheme.primary
+                                ),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                                modifier = Modifier
+                                    .height(32.dp)
+                                    .align(Alignment.End),
+                                shape = RoundedCornerShape(16.dp),
+                                elevation = ButtonDefaults.buttonElevation(0.dp)
+                            ) {
+                                Text(
+                                    text = "Comenzar",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = "Sin comenzar",
+                                style = MaterialTheme.typography.labelSmall.copy(color = Color.Gray)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            LinearProgressIndicator(
+                                progress = { 0f },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(2.dp)),
+                                color = Color.Transparent,
+                                trackColor = Color(0xFFE5E7EB),
+                            )
+                        }
                     }
                 }
             }

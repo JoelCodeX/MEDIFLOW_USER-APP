@@ -116,8 +116,7 @@ private fun HorarioRow(
     isLast: Boolean
 ) {
     val isReached = item.horaReal != null && !currentTime.isBefore(item.horaReal)
-    
-    // Cálculo del progreso de la línea
+
     val progress = remember(currentTime, item.horaReal, nextItemTime) {
         if (item.horaReal == null || nextItemTime == null) 0f
         else if (currentTime.isBefore(item.horaReal)) 0f
@@ -146,20 +145,17 @@ private fun HorarioRow(
                 activeColor = item.color
             )
             if (!isLast) {
-                // Línea de tiempo personalizada con progreso
                 Box(
                     modifier = Modifier
                         .height(32.dp)
-                        .width(2.dp) // Un poco más ancha para ver el relleno
-                        .padding(top = 4.dp)
-                        .background(MaterialTheme.colorScheme.outlineVariant) // Fondo gris
+                        .width(2.dp)
+                        .background(Color.Gray)
                 ) {
-                    // Relleno dinámico
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .fillMaxHeight(progress)
-                            .background(item.color) // Color del item actual llena la línea hacia el siguiente
+                            .background(item.color)
                     )
                 }
             }
@@ -178,26 +174,18 @@ private fun HorarioRow(
                     color = if (isReached) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 
-                if (isFirst) {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = if (isReached) item.color.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = item.hora,
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = if (isReached) item.color else MaterialTheme.colorScheme.onSurfaceVariant,
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = if (isReached) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                            shape = RoundedCornerShape(8.dp)
                         )
-                    }
-                } else {
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
                     Text(
                         text = item.hora,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                        color = if (isReached) item.color else MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = if (isReached) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -219,7 +207,7 @@ private fun LeadingIcon(
     isReached: Boolean,
     activeColor: Color
 ) {
-    val bg = if (isReached) activeColor.copy(alpha = 0.12f) else MaterialTheme.colorScheme.surfaceVariant
+    val bg = if (isReached) activeColor.copy(alpha = 0.12f) else MaterialTheme.colorScheme.outline
     val fg = if (isReached) activeColor else MaterialTheme.colorScheme.onSurfaceVariant
     val borderColor = if (isReached) activeColor else Color.Transparent
 
