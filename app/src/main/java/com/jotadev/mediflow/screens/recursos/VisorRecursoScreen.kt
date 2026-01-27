@@ -27,22 +27,28 @@ fun VisorRecursoScreen(
     url: String,
     tipo: String,
     titulo: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onComplete: () -> Unit = {}
 ) {
     // Decodificar URL por si viene encodeada
     // Pero asumimos que navegación nos pasa string limpio o nosotros lo manejamos.
     // Si usas navegación con argumentos en URL, asegúrate de decodificar antes de llamar a este composable
     // o pasarla decodificada.
 
-    val isVideo = tipo.contains("video", ignoreCase = true) || url.endsWith(".mp4", ignoreCase = true)
+    val isMedia = tipo.contains("video", ignoreCase = true) ||
+            tipo.contains("audio", ignoreCase = true) ||
+            url.endsWith(".mp4", ignoreCase = true) ||
+            url.endsWith(".mp3", ignoreCase = true) ||
+            url.endsWith(".wav", ignoreCase = true) ||
+            url.endsWith(".ogg", ignoreCase = true)
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        if (isVideo) {
-            VideoPlayer(url = url)
+        if (isMedia) {
+            VideoPlayer(url = url, onComplete = onComplete)
         } else {
             val isDoc = tipo.contains("pdf", ignoreCase = true) ||
                     tipo.contains("word", ignoreCase = true) ||
@@ -63,7 +69,7 @@ fun VisorRecursoScreen(
 
 @OptIn(UnstableApi::class)
 @Composable
-fun VideoPlayer(url: String) {
+fun VideoPlayer(url: String, onComplete: () -> Unit = {}) {
     val context = LocalContext.current
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
@@ -71,6 +77,13 @@ fun VideoPlayer(url: String) {
             setMediaItem(mediaItem)
             prepare()
             playWhenReady = true
+            addListener(object : androidx.media3.common.Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == androidx.media3.common.Player.STATE_ENDED) {
+                        onComplete()
+                    }
+                }
+            })
         }
     }
 

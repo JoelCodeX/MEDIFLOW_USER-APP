@@ -67,6 +67,8 @@ data class BottomNavItem(
 fun HomeRoot(onLogoutClick: () -> Unit) {
     val navController = rememberNavController()
     val homeViewModel: com.jotadev.mediflow.screens.home.HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel(factory = com.jotadev.mediflow.screens.home.HomeViewModel.Factory)
+    val recursosViewModel: com.jotadev.mediflow.screens.recursos.RecursosViewModel = androidx.lifecycle.viewmodel.compose.viewModel(factory = com.jotadev.mediflow.screens.recursos.RecursosViewModel.Factory)
+
     var showModal by remember { mutableStateOf(false) }
     var encuestaExitRequests by remember { mutableIntStateOf(0) }
     val state = homeViewModel.state.collectAsState().value
@@ -199,11 +201,12 @@ fun HomeRoot(onLogoutClick: () -> Unit) {
         }
             composable("recursos") { 
                 RecursosScreen(
-                    onResourceClick = { url, tipo, titulo ->
+                    viewModel = recursosViewModel,
+                    onResourceClick = { url, tipo, titulo, id ->
                         val encodedUrl = URLEncoder.encode(url, StandardCharsets.UTF_8.toString())
                         val encodedTipo = URLEncoder.encode(tipo, StandardCharsets.UTF_8.toString())
                         val encodedTitulo = URLEncoder.encode(titulo, StandardCharsets.UTF_8.toString())
-                        navController.navigate("visor?url=$encodedUrl&tipo=$encodedTipo&titulo=$encodedTitulo")
+                        navController.navigate("visor?url=$encodedUrl&tipo=$encodedTipo&titulo=$encodedTitulo&id=$id")
                     }
                 ) 
             }
@@ -212,18 +215,27 @@ fun HomeRoot(onLogoutClick: () -> Unit) {
             composable("perfil") { PerfilScreen(onLogoutClick = onLogoutClick) }
             composable("encuestas") { EncuestasScreen(onFinished = { navController.popBackStack() }, exitRequests = encuestaExitRequests) }
             composable(
-                route = "visor?url={url}&tipo={tipo}&titulo={titulo}",
+                route = "visor?url={url}&tipo={tipo}&titulo={titulo}&id={id}",
                 arguments = listOf(
                     navArgument("url") { type = NavType.StringType; defaultValue = "" },
                     navArgument("tipo") { type = NavType.StringType; defaultValue = "" },
-                    navArgument("titulo") { type = NavType.StringType; defaultValue = "" }
+                    navArgument("titulo") { type = NavType.StringType; defaultValue = "" },
+                    navArgument("id") { type = NavType.IntType; defaultValue = -1 }
                 )
             ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getInt("id") ?: -1
                 VisorRecursoScreen(
                     url = backStackEntry.arguments?.getString("url") ?: "",
                     tipo = backStackEntry.arguments?.getString("tipo") ?: "",
                     titulo = backStackEntry.arguments?.getString("titulo") ?: "Recurso",
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onComplete = {
+                        if (id != -1) {
+                            recursosViewModel.registrarInteraccionCompletado(id)
+                            // Refrescar lista al volver?
+                            recursosViewModel.loadRecursos()
+                        }
+                    }
                 )
             }
         }

@@ -30,38 +30,32 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun RecursosScreen(
-    onResourceClick: (String, String, String) -> Unit
+    viewModel: RecursosViewModel = viewModel(factory = RecursosViewModel.Factory),
+    onResourceClick: (String, String, String, Int) -> Unit
 ) {
-    val viewModel: RecursosViewModel = viewModel(factory = RecursosViewModel.Factory)
     val uiState by viewModel.uiState.collectAsState()
     val recursos by viewModel.items.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Todos") }
 
-    // Mapper temporal para simular progreso si no viene del backend
-    val recursosConProgreso = remember(recursos) {
-        recursos.mapIndexed { index, item ->
-            val simulatedProgress = when (index) {
-                0 -> 0.4f
-                1 -> 1.0f
-                2 -> 0.0f
-                else -> if (item.completed) 1.0f else 0.0f
-            }
-            item.copy(progress = simulatedProgress)
-        }
-    }
-
     LaunchedEffect(Unit) {
         viewModel.loadRecursos()
     }
 
-    val filteredRecursos = remember(recursosConProgreso, searchQuery, selectedCategory) {
-        recursosConProgreso.filter { item ->
+    val filteredRecursos = remember(recursos, searchQuery, selectedCategory) {
+        recursos.filter { item ->
             val matchesSearch = item.title.contains(searchQuery, ignoreCase = true) ||
                     (item.desc?.contains(searchQuery, ignoreCase = true) == true)
-            val matchesCategory = selectedCategory == "Todos" ||
-                    item.tipo?.equals(selectedCategory, ignoreCase = true) == true ||
-                    (selectedCategory == "Documentos" && (item.tipo == "pdf" || item.tipo == "tip"))
+            val matchesCategory = when (selectedCategory) {
+                "Todos" -> true
+                "Video" -> item.tipo.equals("video", ignoreCase = true) || item.url?.endsWith(".mp4", ignoreCase = true) == true
+                "Audio" -> item.tipo.equals("audio", ignoreCase = true) || item.url?.endsWith(".mp3", ignoreCase = true) == true || item.url?.endsWith(".wav", ignoreCase = true) == true || item.url?.endsWith(".ogg", ignoreCase = true) == true
+                "Imagen" -> item.tipo.equals("imagen", ignoreCase = true) || item.url?.endsWith(".jpg", ignoreCase = true) == true || item.url?.endsWith(".png", ignoreCase = true) == true || item.url?.endsWith(".jpeg", ignoreCase = true) == true
+                "Pdf" -> item.tipo.equals("pdf", ignoreCase = true) || item.url?.endsWith(".pdf", ignoreCase = true) == true
+                "Tips" -> item.tipo.equals("tip", ignoreCase = true)
+                "Documentos" -> item.tipo.equals("documento", ignoreCase = true) && item.url?.endsWith(".mp3", ignoreCase = true) != true && item.url?.endsWith(".mp4", ignoreCase = true) != true && item.url?.endsWith(".jpg", ignoreCase = true) != true && item.url?.endsWith(".png", ignoreCase = true) != true
+                else -> false
+            }
 
             matchesSearch && matchesCategory
         }
@@ -143,7 +137,12 @@ fun RecursosScreen(
                                     val url = item.url
                                     if (!url.isNullOrBlank()) {
                                         viewModel.registrarInteraccionVista(item.id)
-                                        onResourceClick(url, item.tipo ?: "documento", item.title)
+                                        onResourceClick(
+                                            url,
+                                            item.tipo ?: "documento",
+                                            item.title,
+                                            item.id
+                                        )
                                     }
                                 }
                             )
@@ -204,9 +203,16 @@ fun CategoryFilters(
     selectedCategory: String,
     onCategorySelected: (String) -> Unit
 ) {
-    val iconcategories= listOf(Icons.Rounded.GridView,Icons.Rounded.PlayCircle,Icons.Rounded.Headphones,
-        Icons.AutoMirrored.Rounded.Article,Icons.Rounded.Image,Icons.Rounded.PictureAsPdf)
-    val categories = listOf("Todos", "Video", "Audio", "Docx","Imagen", "Pdf")
+    val iconcategories = listOf(
+        Icons.Rounded.GridView,
+        Icons.Rounded.PlayCircle,
+        Icons.Rounded.Headphones,
+        Icons.Rounded.Image,
+        Icons.Rounded.PictureAsPdf,
+        Icons.Rounded.Lightbulb,
+        Icons.AutoMirrored.Rounded.Article
+    )
+    val categories = listOf("Todos", "Video", "Audio", "Imagen", "Pdf", "Tips", "Documentos")
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -250,6 +256,19 @@ fun NewResourceCard(
     item: RecursoUi,
     onClick: () -> Unit
 ) {
+    val normalizedType = if (item.tipo.equals("documento", ignoreCase = true)) {
+        when {
+            item.url?.endsWith(".mp3", ignoreCase = true) == true -> "Audio"
+            item.url?.endsWith(".mp4", ignoreCase = true) == true -> "Video"
+            item.url?.endsWith(".pdf", ignoreCase = true) == true -> "Pdf"
+            item.url?.endsWith(".jpg", ignoreCase = true) == true -> "Imagen"
+            item.url?.endsWith(".png", ignoreCase = true) == true -> "Imagen"
+            else -> "Documento"
+        }
+    } else {
+        item.tipo?.capitalize() ?: "Documento"
+    }
+
     Card(
         onClick = onClick,
         modifier = Modifier
@@ -275,17 +294,17 @@ fun NewResourceCard(
                 modifier = Modifier
                     .size(width = 100.dp, height = 80.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(getThumbnailColor(item.tipo)),
+                    .background(getThumbnailColor(normalizedType)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = getIconForType(item.tipo),
+                    imageVector = getIconForType(normalizedType),
                     contentDescription = null,
                     tint = Color.White,
                     modifier = Modifier.size(32.dp)
                 )
                 // Overlay Icon (small corner icon) - optional, mimicking the image
-                if (item.tipo == "pdf") {
+                if (normalizedType.equals("pdf", ignoreCase = true)) {
                     Icon(
                         imageVector = Icons.Rounded.PictureAsPdf,
                         contentDescription = null,
@@ -318,7 +337,7 @@ fun NewResourceCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "${item.tipo?.capitalize() ?: "Documento"} • ${item.desc ?: ""}",
+                    text = "$normalizedType • ${item.desc ?: ""}",
                     style = MaterialTheme.typography.bodySmall.copy(color = Color.Gray),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -444,21 +463,25 @@ fun NewResourceCard(
 }
 
 private fun getIconForType(tipo: String?): ImageVector {
-    return when (tipo?.lowercase()) {
-        "video", "mp4" -> Icons.Rounded.PlayCircle
-        "audio", "mp3" -> Icons.Rounded.Audiotrack
-        "pdf" -> Icons.Rounded.Description // Using Description as generic doc, or PictureAsPdf if preferred
-        "tip" -> Icons.Rounded.Lightbulb
+    val t = tipo?.lowercase() ?: ""
+    return when {
+        t == "video" || t == "mp4" || t.endsWith("mp4") -> Icons.Rounded.PlayCircle
+        t == "audio" || t == "mp3" || t.endsWith("mp3") -> Icons.Rounded.Audiotrack
+        t == "pdf" || t.endsWith("pdf") -> Icons.Rounded.PictureAsPdf
+        t == "tip" -> Icons.Rounded.Lightbulb
+        t == "imagen" || t.endsWith("jpg") || t.endsWith("png") -> Icons.Rounded.Image
         else -> Icons.AutoMirrored.Rounded.Article
     }
 }
 
 private fun getThumbnailColor(tipo: String?): Color {
-    return when (tipo?.lowercase()) {
-        "video", "mp4" -> Color(0xFFE0F2FE) // Light Blue
-        "audio", "mp3" -> Color(0xFFF3E8FF) // Light Purple
-        "pdf" -> Color(0xFFFEE2E2) // Light Red
-        "tip" -> Color(0xFFFEF3C7) // Light Yellow/Amber
+    val t = tipo?.lowercase() ?: ""
+    return when {
+        t == "video" || t == "mp4" || t.endsWith("mp4") -> Color(0xFFE0F2FE) // Light Blue
+        t == "audio" || t == "mp3" || t.endsWith("mp3") -> Color(0xFFF3E8FF) // Light Purple
+        t == "pdf" || t.endsWith("pdf") -> Color(0xFFFEE2E2) // Light Red
+        t == "tip" -> Color(0xFFFEF3C7) // Light Yellow/Amber
+        t == "imagen" || t.endsWith("jpg") || t.endsWith("png") -> Color(0xFFFCE7F3) // Light Pink
         else -> Color(0xFFE5E7EB) // Gray
     }
 }

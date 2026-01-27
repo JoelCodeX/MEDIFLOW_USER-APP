@@ -75,14 +75,27 @@ class RecursosViewModel : ViewModel() {
                     .mapNotNull { it.id_contenido }
                     .toSet()
 
+                val vistos = interacciones
+                    .filter { it.tipo_interaccion == "visto" }
+                    .mapNotNull { it.id_contenido }
+                    .toSet()
+
                 val mapped = contenidos.map { c ->
+                    var progress = 0f
+                    if (completados.contains(c.id)) {
+                        progress = 1.0f
+                    } else if (vistos.contains(c.id)) {
+                        progress = 0.1f // Iniciado
+                    }
+
                     RecursoUi(
                         id = c.id,
                         title = c.titulo,
                         desc = c.descripcion,
                         tipo = c.tipo,
                         url = c.url_archivo,
-                        completed = completados.contains(c.id)
+                        completed = completados.contains(c.id),
+                        progress = progress
                     )
                 }
                 _items.value = mapped
@@ -151,6 +164,29 @@ class RecursosViewModel : ViewModel() {
                 api.registrarInteraccionContenido(body)
             } catch (e: Exception) {
                 Log.e(TAG, "Error registrando interacción de contenido", e)
+            }
+        }
+    }
+
+    fun registrarInteraccionCompletado(idContenido: Int) {
+        viewModelScope.launch {
+            try {
+                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+                val respUser = api.getUsuarioByUid(uid)
+                if (!respUser.isSuccessful) {
+                    return@launch
+                }
+                val usuario: UsuarioDto? = respUser.body()
+                val usuarioId = usuario?.id ?: return@launch
+                val body = RegistrarInteraccionContenidoRequest(
+                    id_usuario = usuarioId,
+                    id_contenido = idContenido,
+                    tipo_interaccion = "completado"
+                )
+                api.registrarInteraccionContenido(body)
+                Log.d(TAG, "Contenido $idContenido marcado como completado")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error registrando completado de contenido", e)
             }
         }
     }
